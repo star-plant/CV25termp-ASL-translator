@@ -2,6 +2,16 @@ import cv2
 import numpy as np
 from collections import deque, Counter
 
+import os  # ← 폴더 생성용 추가
+
+# ===== 저장 디렉토리 생성 =====
+os.makedirs("preprocess_test/mask", exist_ok=True)
+os.makedirs("preprocess_test/edges", exist_ok=True)
+os.makedirs("preprocess_test/skeleton", exist_ok=True)
+
+frame_count = 0  # 프레임 번호 추적
+save_interval = 10  # N프레임마다 저장
+
 
 # === 전처리 함수 ===
 def zhangSuen(bin_img):
@@ -130,20 +140,28 @@ while True:
     if not ret:
         break
 
+    frame_count += 1
+
     try:
-        # 손 분리 → 윤곽 → 스켈레톤 → 특징 추출
+        # 전처리
         mask = histogram_backprojection(frame, hand_hist)
         mask = denoise_mask(mask)
         edges = cv2.Canny(mask, 50, 150)
         skel = zhangSuen(edges)
-        feat = extract_features(skel).reshape(1, -1).astype(np.float32)
 
-        # 예측
+        # 저장 (10프레임 간격)
+        if frame_count % save_interval == 0:
+            fname = f"frame_{frame_count:04d}.png"
+            cv2.imwrite(f"preprocess_test/mask/{fname}", mask)
+            cv2.imwrite(f"preprocess_test/edges/{fname}", edges)
+            cv2.imwrite(f"preprocess_test/skeleton/{fname}", skel)
+
+        # 특징 추출 및 예측
+        feat = extract_features(skel).reshape(1, -1).astype(np.float32)
         ret, result, neighbours, dist = knn.findNearest(feat, k=3)
         pred = int(result[0][0])
         prediction_queue.append(pred)
 
-        # 최빈값(가장 많이 나온 예측값) 사용
         most_common = Counter(prediction_queue).most_common(1)
         label = label_map.get(most_common[0][0], "?")
     except:

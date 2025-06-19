@@ -115,6 +115,11 @@ hand_hist = np.load("hand_histogram.npy")
 features = []
 labels = []
 
+# 전처리 이미지 저장 경로 생성
+os.makedirs("preprocess_dataset/mask", exist_ok=True)
+os.makedirs("preprocess_dataset/edges", exist_ok=True)
+os.makedirs("preprocess_dataset/skeleton", exist_ok=True)
+
 for cls in classes:
     folder = os.path.join(root_dir, cls)
     for fname in os.listdir(folder):
@@ -133,6 +138,13 @@ for cls in classes:
 
         features.append(feat)
         labels.append([label_map[cls]])  # OpenCV expects shape (N,1)
+
+        # === 전처리 이미지 저장 ===
+        fname_no_ext = os.path.splitext(fname)[0]
+        cv2.imwrite(f"preprocess_dataset/mask/{cls}_{fname_no_ext}.png", mask)
+        cv2.imwrite(f"preprocess_dataset/edges/{cls}_{fname_no_ext}.png", edges)
+        cv2.imwrite(f"preprocess_dataset/skeleton/{cls}_{fname_no_ext}.png", skel)
+
 
 # ===== [5] 저장 =====
 X_train = np.array(features, dtype=np.float32)

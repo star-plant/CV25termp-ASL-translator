@@ -14,6 +14,9 @@ DELAY = int(1000 / FPS_LIMIT)
 CLASSES = ["A", "B", "C", "D", "E", "F"]
 IDX_TO_CLASS = {i: cls for i, cls in enumerate(CLASSES)}
 
+# ----------------------<정답 레이블 로딩>------------------------
+gt_labels = np.load("gt_labels.npy")  # 예: [0, 0, 1, 1, 2, ...] (프레임 수만큼)
+
 #-----------------------<특징데이터 로딩, 학습>--------------------------
 X_train = np.load("knn_train_features.npy").astype(np.float32)
 y_train = np.load("knn_train_labels.npy").astype(np.int32)
@@ -140,6 +143,8 @@ while True:
     if not ret:
         break
 
+    frame_idx = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # 현재 프레임 번호
+
     feature_vec, debug_vis = extract_hu_moments_and_fingertips_from_frame(frame)
     if feature_vec is not None:
         sample = feature_vec.reshape(1, -1)
@@ -150,8 +155,17 @@ while True:
         most_common_label, _ = Counter(recent_preds).most_common(1)[0]
         predicted_class = IDX_TO_CLASS.get(most_common_label, '?')
 
+        # 정답 클래스 가져오기
+        if frame_idx < len(gt_labels):
+            GT_CLASS = IDX_TO_CLASS[gt_labels[frame_idx]]
+        else:
+            GT_CLASS = "?"
+
+        # 화면에 출력
         cv2.putText(frame, f"Pred: {predicted_class}", (30, 50),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 255), 3)  # 빨간색
+        cv2.putText(frame, f"Ans: {GT_CLASS}", (30, 100),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)  # 초록색
 
     if debug_vis is not None:
         h, w = frame.shape[:2]
@@ -161,7 +175,7 @@ while True:
         stacked = frame
 
     cv2.imshow("Hu + Fingertip Prediction", stacked)
-    if cv2.waitKey(DELAY) & 0xFF == 27:  # ESC
+    if cv2.waitKey(DELAY) & 0xFF == 27:  # ESC 키
         break
 
 cap.release()

@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 
 # --------< 설정 >-------------
-DATA_ROOT = 'DATA'
+DATA_ROOT = 'DATASET'
 CLASSES = ["A", "B", "C", "D", "E", "F"]
 LABEL_MAP = {cls_name: idx for idx, cls_name in enumerate(CLASSES)}
 RESIZE_SHAPE = (196, 196)

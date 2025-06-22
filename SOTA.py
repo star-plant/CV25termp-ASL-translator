@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import matplotlib.pyplot as plt
 
 # ----------------------<설정>-----------------------------------
-VIDEO_PATH = 'ReTest6.mp4'
+VIDEO_PATH ='Test_video.mp4'
 RESIZE_SHAPE = (196, 196)
 FPS_LIMIT = 60
 DELAY = int(1000 / FPS_LIMIT)

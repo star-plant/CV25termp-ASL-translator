@@ -161,7 +161,7 @@ print(f"Hu + Fingertip features saved: shape={X.shape}, labels={y.shape}")
 #     cls_path = os.path.join(DEBUG_DIR, cls)
 #     if not os.path.isdir(cls_path): continue
 #     image_files = sorted([f for f in os.listdir(cls_path) if f.endswith("_fingertips.png")])
-#     if not image_files: continue
+#     if not image_files: continue 
 #     img_path = os.path.join(cls_path, image_files[0])
 #     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
 #     plt.subplot(1, len(CLASSES), idx + 1)
